@@ -29,8 +29,8 @@ int main( )
 	// Get the data to be written in file
 	filePointer = fopen("abc.txt", "r") ;
     pid_t p=fork();
-    char s1,s2,s3;
-	
+    
+	char s1,s2,s3;
 	// Check if this filePointer is null
 	// which maybe if the file does not exist
 	if ( filePointer == NULL )
