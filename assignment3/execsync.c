@@ -8,6 +8,7 @@ int main(int argc, char * argv[])
     pid_t p;
     int i;
     int f;
+    int stat;
     for(i=0;i<argc;i++)
     {
         p=fork();
@@ -21,7 +22,11 @@ int main(int argc, char * argv[])
         }
         else
         {
-            wait(NULL);
+            wait(&stat);
+            if (WIFEXITED(stat))
+                printf("Exit status: %d\n", WEXITSTATUS(stat));
+            else if (WIFSIGNALED(stat))
+                psignal(WTERMSIG(stat), "Exit signal");
         }
     }
 	return 0;	

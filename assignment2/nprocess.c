@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 	int n=argc;
     int i=0;
     pid_t p;
-    for(i=0;i<n;i++)
+    for(i=1;i<n;i++)
     {
         p=fork();
         if(p==0)

@@ -30,8 +30,8 @@ int main(int argc, char * argv[])
             char * args[]={argv[i], NULL};
             f=execv(args[0],args);
             if(f==-1){
-               perror("error in exec function call");
-            }
+               perror("Error during execv function");
+            }   
         }
     }
 	return 0;	
