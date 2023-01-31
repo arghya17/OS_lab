@@ -23,14 +23,16 @@ void releaseSHM(int signum) {
         int i=0;
         att * shm;
         shm=shmat(shmid,NULL,0);
+        char buffer[80];
         for(i=0;i<n;i++)
         {
-            if((shm+i)->roll != -1)
+            if((shm+i)->roll!=-1)
             {
                 time_t t;
                 t = (shm+i)->tm;
-                struct tm tm = *localtime(&t);
-                printf("student with roll no %d attended at %d-%d-%d",(shm+i)->roll, tm.tm_mday, tm.tm_mon+1, tm.tm_year+1900);
+                struct tm *tm = localtime(&t);
+                strftime(buffer, 80, "%B %d, %Y, %T", tm);
+                printf("\n student with roll no %d attended at %s ",(shm+i)->roll, buffer);
             }
             else
             {
