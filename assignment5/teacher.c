@@ -17,12 +17,21 @@ typedef struct att
 int shmid;
 int n;
 typedef void (*sighandler_t)(int);
+
+int compare(const void *a, const void *b) {
+    att *ia = (att *)a;
+    att *ib = (att *)b;
+    return ia->tm - ib->tm;
+}
+
 void releaseSHM(int signum) {
         int status;
         printf("You have pressed the ctrl-c and the students who have logged in are : \n");
         int i=0;
-        att * shm;
+        att * shm, *s;
         shm=shmat(shmid,NULL,0);
+        s=shm;
+        // qsort(s, n, sizeof(att), compare);
         char buffer[80];
         for(i=0;i<n;i++)
         {
@@ -88,11 +97,11 @@ int main(int argc, char *argv[])
     for(i=0;i<n;i++)
     {
         (shm+i)->roll=-1;
-        // (shm+i)->tm=time(NULL);
+        (shm+i)->tm=time(NULL);
     }
     while(1)
     {
-        sleep(500);
+        sleep(5);
     }
     shmdt(shm);
 }
