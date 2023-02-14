@@ -3,9 +3,9 @@
 #include <sys/ipc.h>   /* for semget(2) ftok(3) semop(2) semctl(2) */
 #include <sys/sem.h>   /* for semget(2) semop(2) semctl(2) */
 #include <unistd.h>    /* for fork(2) */
-
+#include <errno.h>
 #include <stdlib.h> /* for exit(3) */
-
+#include <signal.h>
 #define NO_SEM 1
 
 #define P(s) semop(s, &Pop, 1); // semaphore -- also used to invoke wait
@@ -13,13 +13,21 @@
 
 struct sembuf Pop;
 struct sembuf Vop;
+int semid;
+
+void sigint_handler(int signum)
+{
+    printf("going out of class \n");
+    V(semid);
+    exit(0);
+    return;
+}
 
 int main()
 {
+    signal(SIGINT, sigint_handler);
     key_t key;
     pid_t pid;
-
-    int semid;
 
     int status;
 
@@ -41,6 +49,7 @@ int main()
     Vop.sem_op = 1;
     Vop.sem_flg = SEM_UNDO;
 
+    int semval;
     // key_t ftok(const char *pathname, int proj_id);
     key = ftok("./bcd.txt", 1);
 
@@ -49,20 +58,41 @@ int main()
         perror("ftok() failed");
         exit(1);
     }
-
+    struct semid_ds seminfo;
     //       int semget(key_t key, int nsems, int semflg);
     semid = semget(key, NO_SEM, IPC_CREAT | IPC_EXCL | 0666);
-    if (semid == -1)
+    printf("%d \n", semid);
+    if (semid == -1 && errno == EEXIST)
     {
-        perror("semget() failed");
-        exit(1);
+        semid = semget(key, NO_SEM, IPC_CREAT | 0666);
+        // semaphore already exits
     }
-
+    else if (semid == -1)
+    {
+        perror("semget");
+    }
+    else
+    {
+        setvalArg.val = 3;
+        status = semctl(semid, 0, SETVAL, setvalArg);
+        if (status == -1)
+        {
+            printf("%d \n", errno);
+            perror("semctl() failed");
+            exit(1);
+        }
+    }
+    // printf("%d \n", semid);
+    // semval = semctl(semid, 0, GETVAL);
+    // printf("value of semaphore %d \n", semval);
+    P(semid);
+    // semval = semctl(semid, 0, GETVAL);
+    // printf("value of semaphore %d \n", semval);
+    printf("Please enter the class \n");
+    while (1)
+    {
+        sleep(5);
+    }
+    V(semid);
     // int semctl(int semid, int semnum, int cmd, ...);
-    status = semctl(semid, 0, SETVAL, setvalArg);
-    if (status == -1)
-    {
-        perror("semctl() failed");
-        exit(1);
-    }
 }
